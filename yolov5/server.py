@@ -190,4 +190,4 @@ if __name__ == '__main__':
 						for model_name in model_selection_options}
 	
 	app_str = 'server:app' #make the app string equal to whatever the name of this file is
-	uvicorn.run(app_str, host='localhost', port=8000, reload=True, workers=1)
+	uvicorn.run(app_str, host='localhost', port=8000, reload=False, workers=1)
