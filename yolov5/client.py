@@ -49,7 +49,6 @@ def send_request(file_list = ['./images/zidane.jpg'],
 
 if __name__ == '__main__':
 	#example uploading image batch
-	send_request(file_list=['./images/bus.jpg','./images/zidane.jpg'])
+	send_request(file_list=['./images/bus.jpg','./images/zidane.jpg'],download_image=True)
 
 	#example uploading image and receiving bbox json + image with bboxes drawn
-	#send_request(file_list=['./images/zidane.jpg'], download_image = True)
