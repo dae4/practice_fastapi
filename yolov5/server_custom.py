@@ -39,40 +39,33 @@ def home(request: Request):
       })
 
 def results_to_json(results, model):
-    ''' Helper function for process_home_form()'''
-    return [
-        [
-            {
-                "class": int(pred[5]),
-                "class_name": model.model.names[int(pred[5])],
-                "normalized_box": pred[:4].tolist(),
-                "confidence": float(pred[4]),
-            }
-            for pred in result
-        ]
-        #switch this to results.xyxy to get bbox pixels
-        for result in results.xyxyn 
-    ]
+	''' Converts yolo model output to json (list of list of dicts)
+	'''
+	return [
+				[
+					{
+					"class": int(pred[5]),
+					"class_name": model.model.names[int(pred[5])],
+					"bbox": [int(x) for x in pred[:4].tolist()], #convert bbox results to int from float
+					"confidence": float(pred[4]),
+					}
+				for pred in result
+				]
+			for result in results.xyxy
+			]
 
 @app.post("/")
 async def detect_via_web_form(request: Request,
 							file_list: List[UploadFile] = File(...), 
 							img_size: int = Form(640)):
+  
+  # model = torch.load('./model/yolov5s.pt')
+  model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
+
   img_batch = [cv2.imdecode(np.fromstring(await file.read(), np.uint8), cv2.IMREAD_COLOR) for file in file_list]
 
 
-  model = torch.load('model/best.pt')
-
-  #This is how you decode + process image with PIL
   results = model(img_batch.copy(), size = img_size)
-
-  #This is how you decode + process image with OpenCV
-  #results = model(cv2.imdecode(np.fromstring(await file.read(), np.uint8), cv2.IMREAD_COLOR))
-
-  json_results = results_to_json(results,model)
-
-
-  #.copy() because the images are modified when running model, and we need originals when drawing bboxes later
 
   json_results = results_to_json(results,model)
 
