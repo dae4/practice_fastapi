@@ -61,6 +61,9 @@ async def detect_via_web_form(request: Request,
   
   # model = torch.load('./model/yolov5s.pt')
   model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
+  ## how fix the not found model....
+
+
 
   img_batch = [cv2.imdecode(np.fromstring(await file.read(), np.uint8), cv2.IMREAD_COLOR) for file in file_list]
 
