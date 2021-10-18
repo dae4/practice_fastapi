@@ -54,14 +54,27 @@ def results_to_json(results, model):
 			for result in results.xyxy
 			]
 
+
+def copy_attr(a, b, include=(), exclude=()):
+    # Copy attributes from b to a, options to only include [...] and to exclude [...]
+    for k, v in b.__dict__.items():
+        if (len(include) and k not in include) or k.startswith('_') or k in exclude:
+            continue
+        else:
+            setattr(a, k, v)
+
 @app.post("/")
 async def detect_via_web_form(request: Request,
 							file_list: List[UploadFile] = File(...), 
 							img_size: int = Form(640)):
-  
-  # model = torch.load('./model/yolov5s.pt')
-  model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
-  ## how fix the not found model....
+
+  model = torch.hub.load('ultralytics/yolov5', 'yolov5l', pretrained=False, classes=80)
+  checkpoint_ = torch.load('model/best.pt')['model']
+  model.load_state_dict(checkpoint_.state_dict())
+
+  copy_attr(model, checkpoint_, include=('yaml', 'nc', 'hyp', 'names', 'stride'), exclude=())
+
+  model = model.fuse().autoshape()
 
 
 
