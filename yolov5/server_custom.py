@@ -22,6 +22,8 @@ import random
 import cv2
 import base64
 import numpy as np
+## yolov5
+from models.experimental import attempt_load
 
 
 app = FastAPI()
@@ -68,20 +70,17 @@ async def detect_via_web_form(request: Request,
 							file_list: List[UploadFile] = File(...), 
 							img_size: int = Form(640)):
 
-  model = torch.hub.load('ultralytics/yolov5', 'yolov5l', pretrained=False, classes=80)
-  checkpoint_ = torch.load('model/best.pt')['model']
-  model.load_state_dict(checkpoint_.state_dict())
-
-  copy_attr(model, checkpoint_, include=('yaml', 'nc', 'hyp', 'names', 'stride'), exclude=())
-
-  model = model.fuse().autoshape()
+  weights='model/best.pt'
+  model = attempt_load(weights)  # load FP32 model
+  stride = int(model.stride.max())  # model stride
+  names = model.module.names if hasattr(model, 'module') else model.names  # get class names
 
 
 
   img_batch = [cv2.imdecode(np.fromstring(await file.read(), np.uint8), cv2.IMREAD_COLOR) for file in file_list]
 
 
-  results = model(img_batch.copy(), size = img_size)
+  results = model(img_batch.copy())
 
   json_results = results_to_json(results,model)
 
